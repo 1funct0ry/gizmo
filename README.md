@@ -1,0 +1,2 @@
+# gizmo
+Minimal agent shell
