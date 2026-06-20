@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/1funct0ry/gizmo/internal/agent"
+	"github.com/1funct0ry/gizmo/internal/commands"
 	"github.com/ergochat/readline"
 )
 
@@ -16,17 +17,41 @@ type Shell struct {
 	historyFile string
 	instance    *readline.Instance
 	agent       *agent.Agent
+	cmds        *commands.Registry
 }
 
 func NewShell(prompt string, historyFile string, agent *agent.Agent) *Shell {
-	return &Shell{prompt: prompt, historyFile: historyFile, instance: nil, agent: agent}
+	s := &Shell{
+		prompt:      prompt,
+		historyFile: historyFile,
+		agent:       agent,
+		cmds:        commands.NewRegistry(),
+	}
+	s.registerCommands()
+	return s
+}
+
+func (s *Shell) registerCommands() {
+	s.cmds.Register("exit", "exit gizmo", func(_ string) commands.Action {
+		fmt.Println("Bye ... 👋")
+		return commands.ActionExit
+	})
+	s.cmds.Register("quit", "exit gizmo (alias for /exit)", func(_ string) commands.Action {
+		fmt.Println("Bye ... 👋")
+		return commands.ActionExit
+	})
+	s.cmds.Register("help", "show available slash commands", func(_ string) commands.Action {
+		fmt.Println(s.cmds.HelpText())
+		return commands.ActionNone
+	})
 }
 
 func (s *Shell) Run() error {
 	var err error
 	s.instance, err = readline.NewFromConfig(&readline.Config{
-		Prompt:      s.prompt,
-		HistoryFile: s.historyFile,
+		Prompt:       s.prompt,
+		HistoryFile:  s.historyFile,
+		AutoComplete: s.cmds.Completer(),
 	})
 	if err != nil {
 		return err
@@ -53,8 +78,12 @@ func (s *Shell) Run() error {
 		if line == "" {
 			continue
 		}
-		if line == "/exit" || line == "/quit" {
-			break
+
+		if action, isCmd := s.cmds.Dispatch(line); isCmd {
+			if action == commands.ActionExit {
+				break
+			}
+			continue
 		}
 
 		reply, err := s.agent.Turn(line)
