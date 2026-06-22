@@ -7,6 +7,7 @@ import (
 	"github.com/1funct0ry/gizmo/internal/toolcall"
 	"github.com/1funct0ry/gizmo/internal/toolcall/tools/docker"
 	"github.com/1funct0ry/gizmo/internal/toolcall/tools/fs"
+	git "github.com/1funct0ry/gizmo/internal/toolcall/tools/git"
 	"github.com/1funct0ry/gizmo/internal/toolcall/tools/shell"
 	"github.com/1funct0ry/gizmo/internal/utils"
 	"github.com/openai/openai-go"
@@ -46,6 +47,10 @@ func New(ctx context.Context, baseURL string, model string) *Agent {
 	registry.AddTool(&docker.PullTool{})
 	registry.AddTool(&docker.StopTool{})
 	registry.AddTool(&docker.ComposePsTool{})
+	registry.AddTool(&git.StatusTool{})
+	registry.AddTool(&git.DiffTool{})
+	registry.AddTool(&git.LogTool{})
+	registry.AddTool(&git.CommitTool{})
 
 	return &Agent{
 		context: ctx,
