@@ -9,6 +9,7 @@ import (
 	"github.com/1funct0ry/gizmo/internal/toolcall/tools/fs"
 	git "github.com/1funct0ry/gizmo/internal/toolcall/tools/git"
 	"github.com/1funct0ry/gizmo/internal/toolcall/tools/shell"
+	"github.com/1funct0ry/gizmo/internal/toolcall/tools/sysinfo"
 	"github.com/1funct0ry/gizmo/internal/utils"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
@@ -51,6 +52,12 @@ func New(ctx context.Context, baseURL string, model string) *Agent {
 	registry.AddTool(&git.DiffTool{})
 	registry.AddTool(&git.LogTool{})
 	registry.AddTool(&git.CommitTool{})
+	registry.AddTool(&sysinfo.SysInfoTool{})
+	registry.AddTool(&sysinfo.SysDiskTool{})
+	registry.AddTool(&sysinfo.SysMemoryTool{})
+	registry.AddTool(&sysinfo.SysProcessesTool{})
+	registry.AddTool(&sysinfo.SysEnvTool{})
+	registry.AddTool(&sysinfo.SysNetworkTool{})
 
 	return &Agent{
 		context: ctx,
